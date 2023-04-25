@@ -1,0 +1,491 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+      "paramS3bucket": {
+        "Type": "String"
+      },
+      "paramKeyPairForEc2": {
+        "Type": "String"
+      },
+      "paramSubnetIdForEc2": {
+        "Type": "String"
+      },
+      "paramSubnetId1ForLambda": {
+        "Type": "String"
+      },
+      "vpcSecurityGroupForLambda": {
+        "Type": "String"
+      },
+      "vpcSecurityGroupForEc2": {
+        "Type": "String"
+      },
+      "ec2InstProf": {
+        "Type": "String"
+      },
+      "iamRoleLambda": {
+        "Type": "String"
+      }
+    },
+    "Mappings" : {
+        "RegionMap" : {
+            "ap-south-1" : { "AMI" : "ami-01a4f99c4ac11b03c" }
+        },
+        "SecretsManagerMap" : {
+            "ap-south-1" : { "Endpoint" : "https://secretsmanager.ap-south-1.amazonaws.com" }
+        }
+    },
+    "Resources": {
+      "lambdaChangeMasterPwd": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-ChangeMasterPwd.zip"
+          },
+          "FunctionName" : "awssoldb-ChangeMasterPwd",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-ChangeMasterPwd.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaCheckStatus": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-CheckStatus.zip"
+          },
+          "FunctionName" : "awssoldb-CheckStatus",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-CheckStatus.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaCreateInstance": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-CreateInstance.zip"
+          },
+          "FunctionName" : "awssoldb-CreateInstance",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-CreateInstance.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaCreateReadReplicas": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-CreateReadReplicas.zip"
+          },
+          "FunctionName" : "awssoldb-CreateReadReplicas",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-CreateReadReplicas.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaDeleteOldCluster": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-DeleteOldCluster.zip"
+          },
+          "FunctionName" : "awssoldb-DeleteOldCluster",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-DeleteOldCluster.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaDeleteOldDatabase": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-DeleteOldDatabase.zip"
+          },
+          "FunctionName" : "awssoldb-DeleteOldDatabase",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-DeleteOldDatabase.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaDeleteReplicas": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-DeleteReplicas.zip"
+          },
+          "FunctionName" : "awssoldb-DeleteReplicas",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-DeleteReplicas.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaFixTags": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-FixTags.zip"
+          },
+          "FunctionName" : "awssoldb-FixTags",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-FixTags.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaRenameCluster": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-RenameCluster.zip"
+          },
+          "FunctionName" : "awssoldb-RenameCluster",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-RenameCluster.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaRenameDatabase": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-RenameDatabase.zip"
+          },
+          "FunctionName" : "awssoldb-RenameDatabase",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-RenameDatabase.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaRestore": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-Restore.zip"
+          },
+          "FunctionName" : "awssoldb-Restore",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-Restore.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaRotateMasterPwd": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-RotateMasterPwd.zip"
+          },
+          "FunctionName" : "awssoldb-RotateMasterPwd",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-RotateMasterPwd.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaSendMsg": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-SendMsg.zip"
+          },
+          "FunctionName" : "awssoldb-SendMsg",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-SendMsg.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaSendMsgFailure": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-SendMsgFailure.zip"
+          },
+          "FunctionName" : "awssoldb-SendMsgFailure",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-SendMsgFailure.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaStopOldDatabase": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-StopOldDatabase.zip"
+          },
+          "FunctionName" : "awssoldb-StopOldDatabase",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-StopOldDatabase.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaUpdateDynamoDb": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-UpdateDynamoDb.zip"
+          },
+          "FunctionName" : "awssoldb-UpdateDynamoDb",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-UpdateDynamoDb.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaUpdateDynamoDbFailure": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-UpdateDynamoDbFailure.zip"
+          },
+          "FunctionName" : "awssoldb-UpdateDynamoDbFailure",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-UpdateDynamoDbFailure.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaCreateSecret": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-CreateSecret.zip"
+          },
+          "FunctionName" : "awssoldb-CreateSecret",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-CreateSecret.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ]
+        }
+      },
+      "lambdaRunScriptsMySQL": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Code": {
+            "S3Bucket": { "Ref" : "paramS3bucket" },
+            "S3Key": "functions/awssoldb-RunScriptsMySQL.zip"
+          },
+          "FunctionName" : "awssoldb-RunScriptsMySQL",
+          "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/role-DbRestore-awssoldb" },
+          "Timeout": 300,
+          "Handler": "awssoldb-RunScriptsMySQL.lambda_handler",
+          "Runtime": "python3.8",
+          "MemorySize": 320,
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ],
+          "VpcConfig" : {
+           "SecurityGroupIds" : [
+            { "Ref" : "vpcSecurityGroupForLambda" } 
+           ],
+           "SubnetIds" : [
+            { "Ref": "paramSubnetId1ForLambda" }
+           ]
+          }
+        }
+      },
+      "ec2Instance": {
+        "Type": "AWS::EC2::Instance",
+        "Properties": {
+          "DisableApiTermination": "false",
+          "InstanceInitiatedShutdownBehavior": "stop",
+          "ImageId" : {
+           "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "AMI" ]
+          },
+          "InstanceType": "t3.micro",
+          "KeyName": {
+            "Ref": "paramKeyPairForEc2"
+          },
+          "Monitoring": "false",
+          "SecurityGroupIds" : [
+            {
+              "Ref" : "vpcSecurityGroupForEc2"
+            }
+          ],
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "DbRestore"
+            }
+          ],
+          "SubnetId": {
+            "Ref": "paramSubnetIdForEc2"
+          },
+          "IamInstanceProfile": {
+            "Ref": "ec2InstProf"
+          },
+          "UserData" : {"Fn::Base64" : { "Fn::Join" : ["",[
+            "#!/bin/bash","\n",
+            "yum update -y","\n",
+            "yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm","\n",
+            "systemctl start amazon-ssm-agent","\n",
+            "systemctl enable amazon-ssm-agent","\n",
+            "#Install MySQL client","\n",
+            "yum install -y mysql","\n",
+            "#Install PostgreSQL client","\n",
+            "yum install -y postgresql","\n",
+            "echo `date` >> /tmp/mydir/temp.txt"]]}
+          }
+        }
+      }
+    },
+    "Description": "awssoldb_compute"
+}

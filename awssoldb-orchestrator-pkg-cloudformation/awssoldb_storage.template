@@ -1,0 +1,59 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+      "paramDBPwd": {
+        "Type": "String"
+      },
+      "vpcSecurityGroupForDB": {
+        "Type": "String"
+      }
+    },
+    "Resources": {
+      "dynamodbTable": {
+        "Type" : "AWS::DynamoDB::Table",
+        "Properties" : {
+         "AttributeDefinitions" : [ { "AttributeName" : "dbinstance", "AttributeType" : "S" }, { "AttributeName" : "restoredate", "AttributeType" : "S" } ],
+         "BillingMode" : "PROVISIONED",
+         "KeySchema" : [{"AttributeName":"dbinstance","KeyType":"HASH"},{"AttributeName":"restoredate","KeyType":"RANGE"}],
+         "ProvisionedThroughput" : {"ReadCapacityUnits":5,"WriteCapacityUnits":5},
+         "TableName" : "dbalignment-awssol",
+         "Tags" : [ { "Key": "Name", "Value": "DbRestore" } ],
+         "SSESpecification" :
+         {
+          "SSEEnabled" : true,
+          "SSEType" : "KMS"
+         }
+        }
+      },
+     "RDSdatabase": {
+      "Type" : "AWS::RDS::DBInstance",
+      "Properties" : {
+       "AllocatedStorage" : 5,
+       "AutoMinorVersionUpgrade": false,
+       "BackupRetentionPeriod" : 1,
+       "CopyTagsToSnapshot" : true,
+       "DBInstanceClass" : "db.t3.medium",
+       "DBInstanceIdentifier" : "mysqlinstp",
+       "DBName" : "mysqldbp",
+       "DBSubnetGroupName" : "rds-ec2-db-subnet-group-1",
+       "DeleteAutomatedBackups" : true,
+       "DeletionProtection" : false,
+       "EnableCloudwatchLogsExports" : [ "general" ],
+       "EnableIAMDatabaseAuthentication" : true,
+       "EnablePerformanceInsights" : true,
+       "Engine" : "mysql",
+       "EngineVersion" : "8.0",
+       "MasterUsername" : "admin",
+       "MasterUserPassword" : { "Ref": "paramDBPwd" },
+       "MultiAZ" : true,
+       "PerformanceInsightsRetentionPeriod" : 7,
+       "Port" : "3306",
+       "PubliclyAccessible" : false,
+       "StorageEncrypted" : true,
+       "StorageType" : "gp2",
+       "VPCSecurityGroups" : [ { "Ref": "vpcSecurityGroupForDB" } ]
+      }
+     }
+    },
+    "Description": "awssoldb_storage"
+}

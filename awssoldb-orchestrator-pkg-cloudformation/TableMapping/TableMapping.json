@@ -1,0 +1,14 @@
+{
+    "Production": {
+        "Customer": "CustomerId",
+        "Customer1": "CustomerId",
+        "Customer2": "CustomerId",
+        "Customer4": "CustomerId"
+    },
+    "CustomersPremium": {
+        "CustomerPremium": "CustomerId",
+        "CustomerPremium1": "CustomerId",
+        "CustomerPremium2": "CustomerId",
+        "CustomerPremium3": "CustomerId"
+    }
+}

@@ -1,0 +1,345 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+      "paramVPCId": {
+        "Type": "String"
+      },
+      "paramSNSTopic": {
+        "Type": "String"
+      }
+    },
+    "Resources": {
+      "iamRoleLambda": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Version" : "2012-10-17",
+            "Statement": [ {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [ "lambda.amazonaws.com" ]
+              },
+              "Action": [ "sts:AssumeRole" ]
+            } ]
+          },
+          "ManagedPolicyArns": [ 
+            "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+            { "Ref": "iamManagedPolicyLambdaRole" }
+          ],
+          "RoleName": "role-DbRestore-awssoldb"
+        }
+      },
+      "iamRoleEc2": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Version" : "2012-10-17",
+            "Statement": [ {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [ "lambda.amazonaws.com" ]
+              },
+              "Action": [ "sts:AssumeRole" ]
+            } ]
+          },
+          "ManagedPolicyArns": [ 
+            "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+            { "Ref": "iamManagedPolicyEc2Role" }
+          ],
+          "RoleName": "role-DbRestoreEc2-awssoldb"
+        }
+      },
+      "ec2InstProf": {
+        "Type": "AWS::IAM::InstanceProfile",
+        "Properties": {
+        "Roles": [ 
+            {
+              "Ref": "iamRoleEc2"
+            }
+          ],
+        "InstanceProfileName": "ec2InstProf-awssoldb"
+        }
+      },
+      "iamRoleStepFunctions": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Version" : "2012-10-17",
+            "Statement": [ {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [ "states.amazonaws.com" ]
+              },
+              "Action": [ "sts:AssumeRole" ]
+            } ]
+          },
+          "ManagedPolicyArns": [ 
+            { "Ref": "iamManagedPolicyStepFunctionsRole" }
+          ],
+          "RoleName": "StepFunctionsRoleAutomatic-awssoldb"
+        }
+      },
+      "iamManagedPolicyStepFunctionsRole": {
+        "Type" : "AWS::IAM::ManagedPolicy",
+        "Properties" : {
+          "ManagedPolicyName" : "iamManagedPolicyStepFunctionsRole-awssoldb",
+          "Path": "/",
+          "PolicyDocument" : {
+           "Version": "2012-10-17",
+           "Statement": [
+            {
+             "Effect": "Allow",
+             "Action": [
+              "lambda:InvokeFunction",
+              "lambda:InvokeAsync"
+             ],
+             "Resource": "arn:aws:lambda:*:*:function:*"
+            }
+           ]
+          }
+        }
+      },
+      "iamManagedPolicyLambdaRole": {
+        "Type" : "AWS::IAM::ManagedPolicy",
+        "Properties" : {
+          "ManagedPolicyName" : "iamManagedPolicyLambdaRole-awssoldb",
+          "Path": "/",
+          "PolicyDocument" : {
+           "Version": "2012-10-17",
+           "Statement": [
+            {
+             "Sid": "VisualEditor0",
+             "Effect": "Allow",
+             "Action": [
+              "kms:EnableKey",
+              "kms:ImportKeyMaterial",
+              "kms:GetPublicKey",
+              "kms:Decrypt",
+              "secretsmanager:DescribeSecret",
+              "kms:GenerateDataKeyWithoutPlaintext",
+              "kms:Verify",
+              "kms:CancelKeyDeletion",
+              "kms:GenerateDataKeyPair",
+              "secretsmanager:GetSecretValue",
+              "sns:Publish",
+              "kms:Encrypt",
+              "secretsmanager:RotateSecret",
+              "kms:DescribeKey",
+              "kms:CreateGrant",
+              "kms:EnableKeyRotation",
+              "kms:ListKeyPolicies",
+              "kms:UpdateKeyDescription",
+              "dynamodb:PutItem",
+              "kms:GetKeyPolicy",
+              "kms:DeleteImportedKeyMaterial",
+              "kms:GenerateDataKeyPairWithoutPlaintext",
+              "kms:DisableKey",
+              "kms:ListGrants",
+              "kms:UpdateAlias",
+              "secretsmanager:UpdateSecret",
+              "kms:GenerateDataKey",
+              "kms:CreateAlias",
+              "kms:DeleteAlias",
+              "secretsmanager:TagResource"
+             ],
+             "Resource": [
+              "arn:aws:secretsmanager:*:*:secret:*",
+              { "Fn::Sub": "arn:aws:kms:*:${AWS::AccountId}:alias/*" },
+              { "Fn::Sub": "arn:aws:kms:*:${AWS::AccountId}:key/*" },
+              { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/dbalignment-awssol" },
+              { "Fn::Sub": [ "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${SNSTopic}", { "SNSTopic": {"Ref" : "paramSNSTopic" }} ]}
+             ]
+            },
+            {
+             "Effect": "Allow",
+             "Action": [
+              "ssm:SendCommand",
+              "rds:RestoreDBClusterFromSnapshot",
+              "ec2:DescribeInstances",
+              "secretsmanager:CreateSecret",
+              "iam:PassRole",
+              "ec2:DescribeNetworkInterfaces",
+              "rds:CreateDBInstance",
+              "rds:DescribeDBInstances",
+              "rds:ModifyDBInstance",
+              "s3:DeleteObject",
+              "rds:DeleteDBCluster",
+              "rds:RestoreDBClusterToPointInTime",
+              "rds:DeleteDBInstance",
+              "rds:AddTagsToResource",
+              "lambda:InvokeFunction",
+              "rds:DescribeDBSnapshots",
+              "ec2:DeleteNetworkInterface",
+              "sts:*",
+              "rds:StopDBInstance",
+              "ssm:GetCommandInvocation",
+              "ec2:CreateNetworkInterface",
+              "s3:PutObject",
+              "s3:GetObject",
+              "rds:ListTagsForResource",
+              "rds:RestoreDBInstanceFromDBSnapshot",
+              "rds:DescribeDBClusterSnapshots",
+              "rds:ModifyDBCluster",
+              "rds:CreateDBInstanceReadReplica",
+              "rds:DescribeDBClusters",
+              "rds:RestoreDBInstanceToPointInTime"
+             ],
+             "Resource": "*"
+            }
+           ]
+          }
+        }
+      },
+      "iamManagedPolicy0LambdaSecretsManagerRole": {
+        "Type" : "AWS::IAM::ManagedPolicy",
+        "Properties" : {
+          "ManagedPolicyName" : "iamManagedPolicy0LambdaSecretsManagerRole-awssoldb",
+          "Path": "/",
+          "PolicyDocument" : {
+           "Version": "2012-10-17",
+           "Statement": [
+            {
+             "Action": [
+               "ec2:CreateNetworkInterface",
+               "ec2:DeleteNetworkInterface",
+               "ec2:DescribeNetworkInterfaces",
+               "ec2:DetachNetworkInterface"
+             ],
+             "Resource": "*",
+             "Effect": "Allow"
+            }
+           ]
+          }
+        }
+      },
+      "iamManagedPolicyEc2Role": {
+        "Type" : "AWS::IAM::ManagedPolicy",
+        "Properties" : {
+          "ManagedPolicyName" : "iamManagedPolicyEc2Role-awssoldb",
+          "Path": "/",
+          "PolicyDocument" : {
+           "Version": "2012-10-17",
+           "Statement": [
+            {
+             "Effect": "Allow",
+             "Action": [
+              "s3:PutObject",
+              "s3:GetObject",
+              "s3:ListBucket"
+             ],
+             "Resource": "*"
+            }
+           ]
+          }
+        }
+      },
+      "vpcSecurityGroupForDB": {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+          "GroupDescription" : "Security group attached to the databases used for testing",
+          "GroupName" : "RDSSecGrp-awssoldb",
+          "SecurityGroupIngress" : [
+           {
+            "IpProtocol" : "tcp", 
+            "FromPort" : 5433, 
+            "ToPort" : 5433, 
+            "CidrIp" : "0.0.0.0/0"
+           },
+           {
+            "IpProtocol" : "tcp", 
+            "FromPort" : 5434, 
+            "ToPort" : 5434, 
+            "CidrIp" : "0.0.0.0/0"
+           },
+           {
+            "IpProtocol" : "tcp", 
+            "FromPort" : 3307,
+            "ToPort" : 3307,
+            "CidrIp" : "0.0.0.0/0"
+           },
+           {
+            "IpProtocol" : "tcp", 
+            "FromPort" : 3308,
+            "ToPort" : 3308,
+            "CidrIp" : "0.0.0.0/0"
+           },
+           {
+            "IpProtocol" : "tcp", 
+            "FromPort" : 1522, 
+            "ToPort" : 1522, 
+            "CidrIp" : "0.0.0.0/0"
+           }
+          ],
+          "Tags" : [ { "Key": "Name", "Value": "RDSSecGrp-awssoldb" } ],
+          "VpcId" : { "Ref": "paramVPCId" }
+        }
+      },
+      "vpcSecurityGroupForLambda": {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+          "GroupDescription" : "Security group attached to the Lambda functions used to rotate secrets",
+          "GroupName" : "LambdaSecGrp-awssoldb",
+          "SecurityGroupIngress" : [
+           {
+            "IpProtocol" : "tcp", 
+            "FromPort" : 0, 
+            "ToPort" : 65535, 
+            "SourceSecurityGroupId" : { "Ref": "vpcSecurityGroupForDB" }
+           }
+          ],
+          "Tags" : [ { "Key": "Name", "Value": "LambdaSecGrp-awssoldb" } ],
+          "VpcId" : { "Ref": "paramVPCId" }
+        }
+      },
+      "vpcSecurityGroupForEc2": {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+          "GroupDescription" : "Security group attached to the EC2 instance used to run .sql scripts",
+          "GroupName" : "Ec2SecGrp-awssoldb",
+          "SecurityGroupIngress" : [
+           {
+            "IpProtocol" : "tcp", 
+            "FromPort" : 22, 
+            "ToPort" : 22, 
+            "CidrIp" : "0.0.0.0/0"
+           }
+          ],
+          "Tags" : [ { "Key": "Name", "Value": "Ec2SecGrp-awssoldb" } ],
+          "VpcId" : { "Ref": "paramVPCId" }
+        }
+      }
+   },
+   "Outputs": {
+      "vpcSecurityGroupForDB" : {
+        "Value" :  { 
+          "Ref" : "vpcSecurityGroupForDB" 
+        }
+      },
+      "vpcSecurityGroupForLambda" : {
+        "Value" :  { 
+          "Ref" : "vpcSecurityGroupForLambda" 
+        }
+      },
+      "vpcSecurityGroupForEc2" : {
+        "Value" :  { 
+          "Ref" : "vpcSecurityGroupForEc2" 
+        }
+      },
+      "iamRoleLambda" : {
+        "Value" :  { 
+          "Ref" : "iamRoleLambda" 
+        }
+      },
+      "ec2InstProf" : {
+        "Value" :  { 
+          "Ref" : "ec2InstProf" 
+        }
+      },
+      "iamRoleStepFunctions" : {
+        "Value" :  { 
+          "Ref" : "iamRoleStepFunctions" 
+        }
+      }
+    },
+   "Description": "awssoldb_security"
+}

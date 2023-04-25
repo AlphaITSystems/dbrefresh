@@ -1,0 +1,207 @@
+{
+  "comment": "Input for the State Machine",
+  "deletereplicas": {
+    "dbservice": "aurora",
+    "cluster": "auposclud",
+    "wait_time": 10,
+    "check": {
+       "dbservice": "aurora",
+       "cluster": "auposclud",
+       "checktodo": "checkdeletereplicas",
+       "torun": "false"
+    },
+    "torun": "false"
+  },
+  "stopdb": {
+    "wait_time": 3,
+    "check": {
+       "torun": "false"
+    },
+    "torun": "false"
+  },
+  "restore": {
+    "dbservice": "aurora",
+    "sourcecluster": "auposclup",
+    "targetcluster": "auposclud",
+    "restoretype": "fastcloning",
+    "engine": "aurora-postgresql",
+    "application": "app2",
+    "environment": "development",
+    "port": 5433,
+    "subgrp": "default",
+    "iamdbauth": "True",
+    "cwalogs": "postgresql",
+    "copytagstosnap": "True",
+    "cluparamgrp": "default.aurora-postgresql10",
+    "deletionprotection": "False",
+    "secgrpids": "CHANGE_ME",
+    "wait_time": 10,
+    "check": {
+       "dbservice": "aurora",
+       "cluster": "auposcludtemp",
+       "checktodo": "checkrestore",
+       "torun": "true"
+    },
+    "torun": "true"
+  },
+  "createinstance": {
+    "dbservice": "aurora",
+    "cluster": "auposcludtemp",
+    "dbinstance": "auposinstd",
+    "application": "app2",
+    "environment": "development",
+    "dbclass": "db.t3.medium",
+    "engine": "aurora-postgresql",
+    "subgrp": "default",
+    "dbparamgrp": "default.aurora-postgresql10",
+    "autominor": "False",
+    "copytagstosnap": "True",
+    "perfinsights": "False",
+    "enhancedmon": "False",
+    "wait_time": 10,
+    "check": {
+       "dbservice": "aurora",
+       "dbinstance": "auposinstdtemp",
+       "checktodo": "checkcreate",
+       "torun": "true"
+    },
+    "torun": "true"
+  },
+  "delete": {
+    "dbservice": "aurora",
+    "dbinstance": "auposinstd",
+    "wait_time": 10,
+    "check": {
+       "dbservice": "aurora",
+       "dbinstance": "auposinstd",
+       "checktodo": "checkdelete",
+       "torun": "false"
+    },
+    "torun": "false"
+  },
+  "deletecluster": {
+    "dbservice": "aurora",
+    "cluster": "auposclud",
+    "wait_time": 10,
+    "check": {
+       "dbservice": "aurora",
+       "cluster": "auposclud",
+       "checktodo": "checkdeletecluster",
+       "torun": "false"
+    },
+    "torun": "false"
+  },
+  "renamecluster": {
+    "dbservice": "aurora",
+    "cluster": "auposcludtemp",
+    "wait_time": 10,
+    "check": {
+       "dbservice": "aurora",
+       "cluster": "auposclud",
+       "checktodo": "checkrenamecluster",
+       "torun": "true"
+    },
+    "torun": "true"
+  },
+  "rename": {
+    "dbservice": "aurora",
+    "dbinstance": "auposinstdtemp",
+    "wait_time": 10,
+    "check": {
+       "dbservice": "aurora",
+       "dbinstance": "auposinstd",
+       "checktodo": "checkrename",
+       "torun": "true"
+    },
+    "torun": "true"
+  },
+  "fixtags": {
+    "dbservice": "aurora",
+    "cluster": "auposclud",
+    "cluarn": "arn:aws:rds:CHANGE_ME:CHANGE_ME:cluster:auposclud",
+    "dbinstance": "auposinstd",
+    "dbarn": "arn:aws:rds:CHANGE_ME:CHANGE_ME:db:auposinstd",
+    "wait_time": 10,
+    "check": {
+       "dbservice": "aurora",
+       "cluster": "auposclud",
+       "cluarn": "arn:aws:rds:CHANGE_ME:CHANGE_ME:cluster:auposclud",
+       "dbinstance": "auposinstd",
+       "dbarn": "arn:aws:rds:CHANGE_ME:CHANGE_ME:db:auposinstd",
+       "checktodo": "checkfixtags",
+       "torun": "true"
+    },
+    "torun": "true"
+  },
+  "createreplicas": {
+    "dbservice": "aurora",
+    "cluster": "auposclud",
+    "engine": "aurora-postgresql",
+    "application": "app2",
+    "environment": "development",
+    "dbinstance": "auposinstd",
+    "autominor": "False",
+    "copytagstosnap": "True",
+    "subgrp": "default",
+    "dbparamgrp": "default.aurora-postgresql10",
+    "replicas": "auposinstd-b_db.t3.medium",
+    "wait_time": 10,
+    "check": {
+       "dbservice": "aurora",
+       "replicas": "auposinstd-b",
+       "checktodo": "checkreplicas",
+       "torun": "true"
+    },
+    "torun": "true"
+  },
+  "changemasterpwd": {
+    "dbservice": "aurora",
+    "cluster": "auposclud",
+    "temppwd": "temppwd123",
+    "secret": "false",
+    "wait_time": 10,
+    "check": {
+       "dbservice": "aurora",
+       "cluster": "auposclud",
+       "checktodo": "checkpwd",
+       "torun": "true"
+    },    
+    "torun": "true"
+  },
+  "rotatemasterpwd": {
+    "wait_time": 3,
+    "check": {
+       "torun": "false"
+    },
+    "torun": "false"
+  },
+  "runscripts": {
+    "dbservice": "aurora",
+    "engine": "aurora-postgresql",
+    "wait_time": 3,
+    "check": {
+       "torun": "false"
+    },
+    "torun": "false"
+  },
+  "updatedynamodb": {
+    "dbservice": "aurora",
+    "dbinstance": "auposinstd",
+    "application": "app2",
+    "environment": "development",
+    "source": "auposinstp",
+    "restoretype": "fastcloning",
+    "tablename": "dbalignment-awssol",
+    "torun": "true"
+  },
+  "sendmsg": {
+    "dbservice": "aurora",
+    "application": "app2",
+    "environment": "development",
+    "dbinstance": "auposinstd",
+    "source": "auposinstp",
+    "restoretype": "fastcloning",
+    "topicarn": "arn:aws:sns:CHANGE_ME",
+    "torun": "true"
+  }
+}

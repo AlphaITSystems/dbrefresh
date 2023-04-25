@@ -1,0 +1,179 @@
+{
+  "comment": "Input for the State Machine",
+  "deletereplicas": {
+    "wait_time": 3,
+    "check": {
+      "torun": "false"
+    },
+    "torun": "false"
+  },
+  "stopdb": {
+    "dbservice": "rds",
+    "dbinstance": "testdbrefreshed",
+    "wait_time": 10,
+    "check": {
+      "dbservice": "rds",
+      "dbinstance": "testdbrefreshed",
+      "checktodo": "checkstopdb",
+      "torun": "false"
+    },
+    "torun": "false"
+  },
+  "restore": {
+    "application": "app1",
+    "dbservice": "rds",
+    "source": "productiondb",
+    "target": "testdbrefreshed",
+    "restoretype": "latestpoint",
+    "environment": "Production-ec2",
+    "port": 3306,
+    "subgrp": "rds-ec2-db-subnet-group-1",
+    "iamdbauth": "False",
+    "cwalogs": "audit,error,general,slowquery",
+    "copytagstosnap": "True",
+    "dbparamgrp": "default.mysql8.0",
+    "deletionprotection": "False",
+    "secgrpids": "sg-00337bb0cbd94a673",
+    "multiaz": "False",
+    "dbname": "testdbrefresh",
+    "dbclass": "db.t3.medium",
+    "autominor": "False",
+    "storagetype": "gp2",
+    "wait_time": 220,
+    "check": {
+      "dbservice": "rds",
+      "dbinstance": "testdbrefreshedtemp",
+      "checktodo": "checkrestore",
+      "torun": "true"
+    },
+    "torun": "true"
+  },
+  "createinstance": {
+    "wait_time": 3,
+    "check": {
+      "torun": "false"
+    },
+    "torun": "false"
+  },
+  "delete": {
+    "dbservice": "rds",
+    "dbinstance": "testdbrefreshed",
+    "wait_time": 10,
+    "check": {
+      "dbservice": "rds",
+      "dbinstance": "testdbrefreshed",
+      "checktodo": "checkdelete",
+      "torun": "false"
+    },
+    "torun": "false"
+  },
+  "deletecluster": {
+    "wait_time": 3,
+    "check": {
+      "torun": "false"
+    },
+    "torun": "false"
+  },
+  "renamecluster": {
+    "wait_time": 3,
+    "check": {
+      "torun": "false"
+    },
+    "torun": "false"
+  },
+  "rename": {
+    "dbservice": "rds",
+    "dbinstance": "testdbrefreshedtemp",
+    "wait_time": 150,
+    "check": {
+      "dbservice": "rds",
+      "dbinstance": "testdbrefreshed",
+      "checktodo": "checkrename",
+      "torun": "true"
+    },
+    "torun": "true"
+  },
+  "fixtags": {
+    "dbservice": "rds",
+    "dbinstance": "testdbrefreshed",
+    "dbarn": "arn:aws:rds:ap-south-1:212095530037:db:testdbrefreshed",
+    "wait_time": 10,
+    "check": {
+      "dbservice": "rds",
+      "dbinstance": "testdbrefreshed",
+      "dbarn": "arn:aws:rds:ap-south-1:212095530037:db:testdbrefreshed",
+      "checktodo": "checkfixtags",
+      "torun": "true"
+    },
+    "torun": "true"
+  },
+  "createreplicas": {
+    "wait_time": 3,
+    "check": {
+      "torun": "false"
+    },
+    "torun": "false"
+  },
+  "changemasterpwd": {
+    "dbservice": "rds",
+    "dbinstance": "testdbrefreshed",
+    "temppwd": "temppwd123",
+    "secret": "false",
+    "secretname": "CHANGE_ME",
+    "wait_time": 100,
+    "check": {
+      "dbservice": "rds",
+      "dbinstance": "testdbrefreshed",
+      "checktodo": "checkpwd",
+      "torun": "false"
+    },
+    "torun": "true"
+  },
+  "rotatemasterpwd": {
+    "dbservice": "rds",
+    "dbinstance": "testdbrefreshed",
+    "secretname": "CHANGE_ME",
+    "wait_time": 10,
+    "check": {
+      "dbservice": "rds",
+      "secretname": "CHANGE_ME",
+      "temppwd": "temppwd123",
+      "checktodo": "rotatepwd",
+      "torun": "false"
+    },
+    "torun": "false"
+  },
+  "maskingrefresheddata": {
+    "dbservice": "rds",
+    "dbinstance": "testdbrefreshed",
+    "wait_time": 200,
+    "dbendpoint": "testdbrefreshed.czogckszbkfu.ap-south-1.rds.amazonaws.com",
+    "ec2endpoint": "ec2-3-109-55-255.ap-south-1.compute.amazonaws.com",
+    "ec2name": "ec2-user",
+    "keyfilepath": "C:\\Users\\hp\\Desktop\\Test-ec2-key.pem",
+    "dbusername": "production",
+    "dbpassword": "temppwd123",
+    "localinfile": "true",
+    "torun": "true"
+  },
+  "updatedynamodb": {
+    "dbservice": "rds",
+    "dbinstance": "testdb",
+    "application": "app1",
+    "environment": "development",
+    "source": "mysqlinstp",
+    "restoretype": "latestpoint",
+    "tablename": "dbalignment-awssol",
+    "torun": "true"
+  },
+  "sendmsg": {
+    "dbservice": "rds",
+    "application": "app1",
+    "environment": "development",
+    "dbinstance": "testdbrefreshed",
+    "source": "mysqlinstp",
+    "restoretype": "latestpoint",
+    "topicarn": "arn:aws:sns:CHANGE_ME",
+    "torun": "false"
+  }
+}

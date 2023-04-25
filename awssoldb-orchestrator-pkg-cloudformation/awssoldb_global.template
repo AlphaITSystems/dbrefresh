@@ -1,0 +1,85 @@
+{
+ "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+   "paramDBPwd": {
+    "NoEcho": "true",
+    "Description" : "Master user password for the RDS instances",
+    "Type": "String"
+   },
+   "paramVPCId": {
+    "NoEcho": "false",
+    "Description" : "The ID of a VPC in the current region",
+    "Type": "String"
+   },
+   "paramS3bucket": {
+    "NoEcho": "false",
+    "Description" : "S3 bucket name containing the Cloudformation templates",
+    "Type": "String"
+   },
+   "paramKeyPairForEc2": {
+    "NoEcho": "false",
+    "Description" : "EC2 key pair for the EC2 instance used to run SQL scripts",
+    "Type": "String"
+   },
+   "paramSubnetIdForEc2": {
+    "NoEcho": "false",
+    "Description" : "Subnet Id for the EC2 instance used to run SQL scripts",
+    "Type": "String"
+   },
+   "paramSubnetId1ForLambda": {
+    "NoEcho": "false",
+    "Description" : "First subnet Id for the Lambda functions used to run SQL scripts",
+    "Type": "String"
+   },
+   "paramSNSTopic": {
+    "NoEcho": "false",
+    "Description" : "SNS Topic used to send notifications at the end of each refresh",
+    "Type": "String"
+   }
+  },
+  "Resources": {
+   "OrchestrationStack": {
+    "Type": "AWS::CloudFormation::Stack",
+    "Properties": {
+     "TemplateURL": { "Fn::Sub": [ "https://${S3bucket}.s3.amazonaws.com/awssoldb_orchestration.template", { "S3bucket": {"Ref" : "paramS3bucket" }} ]}
+    }
+   },
+   "SecurityStack": {
+    "Type": "AWS::CloudFormation::Stack",
+    "Properties": {
+     "Parameters": {
+      "paramVPCId": { "Ref" : "paramVPCId" },
+      "paramSNSTopic": { "Ref" : "paramSNSTopic" }
+     },
+     "TemplateURL": { "Fn::Sub": [ "https://${S3bucket}.s3.amazonaws.com/awssoldb_security.template", { "S3bucket": {"Ref" : "paramS3bucket" }} ]}
+    }
+   },
+   "StorageStack": {
+    "Type": "AWS::CloudFormation::Stack",
+    "Properties": {
+     "Parameters": {
+      "paramDBPwd": { "Ref" : "paramDBPwd" },
+      "vpcSecurityGroupForDB": { "Fn::GetAtt": ["SecurityStack", "Outputs.vpcSecurityGroupForDB"] }
+     },
+     "TemplateURL": { "Fn::Sub": [ "https://${S3bucket}.s3.amazonaws.com/awssoldb_storage.template", { "S3bucket": {"Ref" : "paramS3bucket" }} ]}
+    }
+   },
+   "ComputeStack": {
+    "Type": "AWS::CloudFormation::Stack",
+    "Properties": {
+     "Parameters": {
+      "paramS3bucket": { "Ref" : "paramS3bucket" },
+      "paramKeyPairForEc2": { "Ref" : "paramKeyPairForEc2" },
+      "paramSubnetIdForEc2": { "Ref" : "paramSubnetIdForEc2" },
+      "paramSubnetId1ForLambda": { "Ref" : "paramSubnetId1ForLambda" },
+      "vpcSecurityGroupForLambda": { "Fn::GetAtt": ["SecurityStack", "Outputs.vpcSecurityGroupForLambda"] },
+      "vpcSecurityGroupForEc2": { "Fn::GetAtt": ["SecurityStack", "Outputs.vpcSecurityGroupForEc2"] },
+      "ec2InstProf": { "Fn::GetAtt": ["SecurityStack", "Outputs.ec2InstProf"] },
+      "iamRoleLambda": { "Fn::GetAtt": ["SecurityStack", "Outputs.iamRoleLambda"] }
+     },
+     "TemplateURL": { "Fn::Sub": [ "https://${S3bucket}.s3.amazonaws.com/awssoldb_compute.template", { "S3bucket": {"Ref" : "paramS3bucket" }} ]}
+    }
+   }
+  },
+ "Description": "awssoldb_global"
+}

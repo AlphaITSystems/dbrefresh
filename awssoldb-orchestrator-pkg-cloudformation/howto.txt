@@ -1,0 +1,36 @@
+# HOW TO
+
+# REQUIREMENTS:
+# - AWS Account
+# - AWS CLI installed on a Linux client
+# - IAM credentials with Step Functions privileges
+# - Python installed on a Linux client
+
+# STEPS:
+# 0. Connect to your Linux client
+# 1. Download the file awssoldb-orchestrator-pkg-cloudformation.zip
+# 2. Unzip the file awssoldb-orchestrator-pkg-cloudformation.zip
+# 3. Create a new S3 bucket:
+#	aws s3 mb s3://<bucket-name> --region us-east-1
+# 4. Run the following commands in order to upload the necessary files:
+#	cd ./awssoldb-orchestrator-pkg-cloudformation
+#	aws s3 cp *.template s3://<bucket-name>/
+#	cd ./functions
+#	aws s3 cp *.zip s3://<bucket-name>/functions
+#	cd ..
+#	cd ./sql-scripts
+#	aws s3 cp *.sql s3://<bucket-name>/sql-scripts
+# 5. Launch CloudFormation, submitting the root stack "awssoldb_global.template"
+# 6. Download the file awssoldb-orchestrator-launch.zip
+# 7. Unzip the file awssoldb-orchestrator-launch.zip
+# 8. Do the following before launch the refreshes:
+#	- In both files "db-*.json" change the parameter "secgrpids" with the security group created by CloudFormation
+#	- In both files "db-*.json" change the ARN of the resources, in particularly substitite the account number
+#	- In the file "db-app1-mysqlinstd.json" change the parameter "secretname" with a value of a parameter that doesn't exist and that wasn't recently deleted (you need to wait at least 7 days before re-use a secret name, this is because the service)
+	- In the file "db-app1-mysqlinstd.json" change the parameters "bucketname", "prefix" and "keys" based on where you upload the .sql scripts provided (in the "sql-scripts" directory")
+# 9. Run the python script launch_refresh.py
+#	cd ./awssoldb-orchestrator-launch
+#	python launch_refresh.py auposinstd app2 arn:aws:states:us-east-1:123456789012:stateMachine:state-machine-awssol us-east-1
+#	python launch_refresh.py mysqlinstd app1 arn:aws:states:us-east-1:123456789012:stateMachine:state-machine-awssol us-east-1
+
+
